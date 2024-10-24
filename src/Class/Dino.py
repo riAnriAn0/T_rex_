@@ -3,6 +3,8 @@ import pygame
 IMAGEM_DINO_REBAIXADO = pygame.image.load('src/img/dino_rebaixado.png')
 IMAGEM_DINO = pygame.image.load('src/img/dino.png')
 
+    #Class Dino
+
 class Dino:
 
     IMAGEM = IMAGEM_DINO
