@@ -120,6 +120,14 @@ def main():
             for ave in aves:
                 dino.colisao(ave)
 
+            if not dino.colidir:
+                text.pontos += 1
+                if text.pontos % 100 == 0:
+                    chao.velocidade += 1 
+                    # Atualiza a velocidade dos obstáculos existentes
+                    for c in cactos: c.velocidade += 2
+                    for a in aves: a.velocidade += 2
+
             # Remoção de objetos
             for i, cacto in enumerate(cactos[:]):
                 cacto.remover(cactos, i)
@@ -127,14 +135,6 @@ def main():
                 ave.remover(aves, i)
             for i, nuvem in enumerate(nuvens[:]):
                 nuvem.remover(nuvens, i)
-
-            if not dino.colidir:
-                text.pontos += 1
-                if text.pontos % 100 == 0:
-                    chao.velocidade += 1 
-                    # Atualiza a velocidade dos obstáculos existentes
-                    for c in cactos: c.velocidade += 1
-                    for a in aves: a.velocidade += 1
 
             retornar(display, game_over, dino, text)
             pygame.display.flip()
