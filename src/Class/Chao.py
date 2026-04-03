@@ -14,7 +14,7 @@ class Chao:
         self.y = 340
         self.x_2 = 1200
         self.y_2 = 340
-        self.velocidade = 20
+        self.velocidade = 10
         self.sprite_width = self.IMAGEM.get_width()
         self.sprite_height = self.IMAGEM.get_height()
 

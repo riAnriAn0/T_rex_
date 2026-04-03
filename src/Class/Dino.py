@@ -22,6 +22,8 @@ class Dino:
         self.pulando = False
         self.colidir = False
         self.abaixar = False
+        self.som_pulo = pygame.mixer.Sound('src/audio/geaan_caaandido.ogg') # Caminho do seu áudio
+        self.som_pulo.set_volume(0.5) # Ajuste de volume de 0 a 1
 
     def desenhar(self, tela):
         
@@ -45,19 +47,29 @@ class Dino:
             self.imagem = self.IMAGEM
             tela.blit( self.imagem,(self.x, self.y), (self.sprite_atual * 87.5, 0, 87.5, 94))
 
-    def pular(self):
-
-        if  not self.pulando:
+    def pular(self, segurando_espaco):
+    # 1. Início do Pulo
+        if not self.pulando:
             self.pulando = True
-            self.y -= 200 
+            self.velocidade_vertical = -15
+            self.som_pulo.play() # INICIA O ÁUDIO AQUI
 
-        if self.y < 270:
-                self.y += self.velocidade
-                self.velocidade += self.gravidade
-                if self.y > 265:
-                    self.y = 265
-                    self.pulando = False
-                    self.velocidade = 0
+        # 2. Física do Pulo
+        if self.pulando:
+            if segurando_espaco:
+                gravidade_aplicada = 0.4
+            else:
+                gravidade_aplicada = 1.2
+
+            self.y += self.velocidade_vertical
+            self.velocidade_vertical += gravidade_aplicada
+
+            # 3. Tocou no chão
+            if self.y >= 265:
+                self.y = 265
+                self.pulando = False
+                self.velocidade_vertical = 0
+                self.som_pulo.stop() # INTERROMPE O ÁUDIO IMEDIATAMENTE
 
     def mask(self):
         if self.abaixar:

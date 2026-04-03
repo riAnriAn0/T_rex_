@@ -12,6 +12,7 @@ from Class.Over import Over
 from Class.Text import Text
 
 pygame.init()
+pygame.mixer.init()
 
 def desenhar(tela, chao, nuvens, cactos, aves, dino, text):
     text.showPontos()
@@ -38,7 +39,6 @@ def desenhar(tela, chao, nuvens, cactos, aves, dino, text):
         ave.desenhar(tela)
 
 def retornar(tela, game_over, dino, text):
-
     if dino.colidir:
         game_over.desenhar(tela)
         text.gameOver()
@@ -48,99 +48,113 @@ def retornar(tela, game_over, dino, text):
 def main():
     DISPLAY_WIDTH = 1200
     DIPLAY_HEIGHT = 500
-
-    display = pygame.display.set_mode((DISPLAY_WIDTH,DIPLAY_HEIGHT))
+    display = pygame.display.set_mode((DISPLAY_WIDTH, DIPLAY_HEIGHT))
     clock = pygame.time.Clock()
-    rodando = True
-    game_over = Over()
-    chao = Chao()
-    nuvens = [Nuvem(1100,100)]
-    cactos = [Cactos(1400)]
-    aves = [Aves(3000)]
-    dino = Dino()
+    
     text = Text(display)
 
-    while rodando:
-    
-        clock.tick(17) 
-        display.fill((247,247,247))
+    while True: # LOOP PRINCIPAL DO APLICATIVO
+        game_over = Over()
+        chao = Chao()
+        nuvens = [Nuvem(1100, 100)]
+        cactos = []
+        aves = []
+        dino = Dino()
+        text.pontos = 0 
 
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                rodando = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:    
-                    dino.pular()
-                if event.key == pygame.K_r and dino.colidir:
-                    main() 
-        
-        keys = pygame.key.get_pressed()
+        jogando = True
+        while jogando: # LOOP DA PARTIDA ATUAL
+            clock.tick(30) 
+            display.fill((247, 247, 247))
 
-        if keys[pygame.K_DOWN]:
-            dino.abaixar = True
-        else:
-            dino.abaixar = False
+            # Captura o estado das teclas para o pulo variável
+            keys = pygame.key.get_pressed()
+            espaco_pressionado = keys[pygame.K_SPACE]
 
-        if dino.pulando:
-            dino.pular()
+            # --- ÚNICO LOOP DE EVENTOS ---
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    exit()
+                
+                if event.type == pygame.KEYDOWN:
+                    # Inicia o pulo apenas no momento do clique
+                    if event.key == pygame.K_SPACE and not dino.colidir:
+                        dino.pular(espaco_pressionado)
 
-        if nuvens[0].x < 700 and len(nuvens) < 2:
-            x = random.randrange(1100,1300,100)
-            y = random.randrange(190,270,20)
-            nuvens.append(Nuvem(x, y - 10))
-
-    # Sortei a saida do cacto(3 ou 2 ou 1) ou aves
-        num = random.randrange(0,10,1)
-        num_cactos = random.randrange(1,3,1)
-
-        if  len(aves) == 0 and len(cactos) == 0:
-            if num <= 9 :
-                if num_cactos == 1:
-                    cactos.append(Cactos(1200))
-                elif num == 2: 
-                    cactos.append(Cactos(1205))
-                    cactos.append(Cactos(1245))
-                else:
-                    cactos.append(Cactos(1205))
-                    cactos.append(Cactos(1245))
-                    cactos.append(Cactos(1290))
+            # --- LÓGICA CONTÍNUA (FORA DO EVENT LOOP) ---
             
+            # Executa a física do pulo enquanto estiver no ar
+            if dino.pulando:
+                dino.pular(espaco_pressionado)
+            
+            # Lógica de Agachar (Seta para Baixo)
+            if keys[pygame.K_DOWN]:
+                if not dino.abaixar:
+                    dino.sprite_atual = 0 
+                dino.abaixar = True
             else:
-                aves.append(Aves(1300)) 
-                aves.append(Aves(1300)) 
-        
-        desenhar(display,chao, nuvens, cactos, aves, dino, text)
-           
-        for cacto in cactos:
-            dino.colisao(cacto) 
-        
-        for ave in aves:
-            dino.colisao(ave)
+                dino.abaixar = False
 
-        for i,cacto in enumerate(cactos):
-            cacto.remover(cactos, i)
+            # Gerenciamento de Nuvens
+            if nuvens[0].x < 700 and len(nuvens) < 2:
+                x = random.randrange(1100, 1300, 100)
+                y = random.randrange(190, 270, 20)
+                nuvens.append(Nuvem(x, y - 10))
 
-        for i,ave in enumerate(aves):
-            ave.remover(aves, i)
-
-        for i, nuvem in enumerate(nuvens):
-            nuvem.remover(nuvens, i)
-
-        if not dino.colidir:
-            text.pontos += 1
-        if text.pontos % 100 == 0:
-            chao.velocidade += 10
+            # Sorteio de Obstáculos
+            if len(aves) == 0 and len(cactos) == 0:
+                num = random.randrange(0, 10, 1)
+                if num <= 8: 
+                    num_cactos = random.randrange(1, 4, 1)
+                    for i in range(num_cactos):
+                        cactos.append(Cactos(1200 + (i * 50)))
+                else: 
+                    aves.append(Aves(1300)) 
+            
+            desenhar(display, chao, nuvens, cactos, aves, dino, text)
+               
             for cacto in cactos:
-                cacto.velocidade  += 10
+                dino.colisao(cacto) 
+            
+            for ave in aves:
+                dino.colisao(ave)
 
-        retornar(display, game_over, dino, text )
-        
-        pygame.display.flip()
+            # Remoção de objetos
+            for i, cacto in enumerate(cactos[:]):
+                cacto.remover(cactos, i)
+            for i, ave in enumerate(aves[:]):
+                ave.remover(aves, i)
+            for i, nuvem in enumerate(nuvens[:]):
+                nuvem.remover(nuvens, i)
 
-    pygame.quit()
-    exit()
+            if not dino.colidir:
+                text.pontos += 1
+                if text.pontos % 100 == 0:
+                    chao.velocidade += 1 
+                    # Atualiza a velocidade dos obstáculos existentes
+                    for c in cactos: c.velocidade += 1
+                    for a in aves: a.velocidade += 1
+
+            retornar(display, game_over, dino, text)
+            pygame.display.flip()
+
+            if dino.colidir:
+                jogando = False 
+
+        # LOOP DE ESPERA (GAME OVER)
+        esperando = True
+        while esperando:
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == KEYDOWN:
+                    if event.key == K_r: 
+                        esperando = False
+                    if event.key == K_ESCAPE:
+                        pygame.quit()
+                        exit()
 
 if __name__ == "__main__":
     main()
-
-

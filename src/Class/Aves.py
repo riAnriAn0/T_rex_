@@ -14,7 +14,7 @@ class Aves:
         self.x = x
         self.y = 200
         self.imagem = self.IMAGEM
-        self.velocidade = 30
+        self.velocidade = 15
         self.sprite_width = self.IMAGEM.get_width()
         self.sprite_height = self.IMAGEM.get_height()
         self.sprite_atual = 1

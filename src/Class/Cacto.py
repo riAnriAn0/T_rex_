@@ -14,7 +14,7 @@ class Cactos:
         self.x = x
         self.y = 275  
         self.imagem = self.IMAGEM
-        self.velocidade = 25
+        self.velocidade = 10
         self.sprite_width = self.IMAGEM.get_width()
         self.sprite_height = self.IMAGEM.get_height()
         self.passou = False
