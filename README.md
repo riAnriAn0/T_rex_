@@ -14,7 +14,7 @@ O objetivo e controlar o Dino, desviar dos obstaculos e sobreviver o maior tempo
 2. Execute:
 
 ```bash
-git clone <URL_DO_REPOSITORIO>
+git clone https://github.com/riAnriAn0/T_rex_.git
 ```
 
 3. Entre na pasta do projeto:
